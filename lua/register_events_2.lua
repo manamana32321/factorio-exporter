@@ -1,4 +1,4 @@
-local p=storage.bridge_push
+local p=bridge_push
 script.on_event(defines.events.on_player_promoted,function(e)p({type="player_promoted",player=game.get_player(e.player_index).name,tick=e.tick})end)
 script.on_event(defines.events.on_player_demoted,function(e)p({type="player_demoted",player=game.get_player(e.player_index).name,tick=e.tick})end)
 script.on_event(defines.events.on_rocket_launch_ordered,function(e)p({type="rocket_launch_ordered",tick=e.tick})end)
