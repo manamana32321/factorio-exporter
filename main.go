@@ -53,7 +53,12 @@ func main() {
 
 	// Load Lua scripts
 	collectLua := mustReadFile("/lua/collect.lua")
-	registerEventsLua := mustReadFile("/lua/register_events.lua")
+	registerScripts := []string{
+		mustReadFile("/lua/register_init.lua"),
+		mustReadFile("/lua/register_events_1.lua"),
+		mustReadFile("/lua/register_events_2.lua"),
+		mustReadFile("/lua/register_events_3.lua"),
+	}
 	pollEventsLua := mustReadFile("/lua/poll_events.lua")
 
 	// Components
@@ -95,7 +100,7 @@ func main() {
 
 	// 5. Event poller
 	if cfg.Events.Enabled {
-		poller := NewEventPoller(rconPool, registerEventsLua, pollEventsLua, cfg.Events.PollInterval)
+		poller := NewEventPoller(rconPool, registerScripts, pollEventsLua, cfg.Events.PollInterval)
 		poller.Subscribe(otelSub)
 		poller.Subscribe(bridgeSub)
 		wg.Add(1)

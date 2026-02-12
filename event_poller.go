@@ -22,20 +22,20 @@ type RCONEvent struct {
 
 // EventPoller registers Lua event handlers via RCON and polls the event queue.
 type EventPoller struct {
-	rcon         *RCONPool
-	registerLua  string
-	pollLua      string
-	pollInterval time.Duration
-	subscribers  []LogSubscriber
-	registered   bool
+	rcon            *RCONPool
+	registerScripts []string
+	pollLua         string
+	pollInterval    time.Duration
+	subscribers     []LogSubscriber
+	registered      bool
 }
 
-func NewEventPoller(pool *RCONPool, registerLua, pollLua string, interval time.Duration) *EventPoller {
+func NewEventPoller(pool *RCONPool, registerScripts []string, pollLua string, interval time.Duration) *EventPoller {
 	return &EventPoller{
-		rcon:         pool,
-		registerLua:  registerLua,
-		pollLua:      pollLua,
-		pollInterval: interval,
+		rcon:            pool,
+		registerScripts: registerScripts,
+		pollLua:         pollLua,
+		pollInterval:    interval,
 	}
 }
 
@@ -66,19 +66,28 @@ func (p *EventPoller) Run(ctx context.Context) {
 
 func (p *EventPoller) registerWithRetry(ctx context.Context) {
 	for {
-		resp, err := p.rcon.Execute("/sc " + p.registerLua)
-		if err == nil && strings.TrimSpace(resp) == "ok" {
+		if p.executeScripts() {
 			p.registered = true
 			log.Println("RCON event handlers registered")
 			return
 		}
-		log.Printf("event registration failed (err=%v, resp=%s), retrying in 15s", err, resp)
 		select {
 		case <-ctx.Done():
 			return
 		case <-time.After(15 * time.Second):
 		}
 	}
+}
+
+func (p *EventPoller) executeScripts() bool {
+	for i, script := range p.registerScripts {
+		resp, err := p.rcon.Execute("/sc " + script)
+		if err != nil || strings.TrimSpace(resp) != "ok" {
+			log.Printf("event registration failed at script %d (err=%v, resp=%s), retrying in 15s", i+1, err, resp)
+			return false
+		}
+	}
+	return true
 }
 
 func (p *EventPoller) poll() {
