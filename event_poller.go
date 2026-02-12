@@ -99,7 +99,7 @@ func (p *EventPoller) poll() {
 	}
 
 	resp = strings.TrimSpace(resp)
-	if resp == "" || resp == "[]" {
+	if resp == "" || resp == "[]" || resp == "{}" {
 		return
 	}
 
