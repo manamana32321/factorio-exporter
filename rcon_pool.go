@@ -57,7 +57,7 @@ func (p *RCONPool) getConn() (*rcon.Conn, error) {
 	if p.conn != nil {
 		return p.conn, nil
 	}
-	conn, err := rcon.Dial(p.addr, p.password)
+	conn, err := rcon.Dial(p.addr, p.password, rcon.SetMaxCommandLen(4096))
 	if err != nil {
 		return nil, err
 	}
