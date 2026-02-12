@@ -102,8 +102,14 @@ func loadConfig() (Config, error) {
 	}
 	// config file is optional — missing file is not an error
 
-	// Secrets from env (always override)
+	// Env overrides (secrets + runtime values)
 	cfg.RCON.Password = os.Getenv("RCON_PASSWORD")
+	if v := os.Getenv("RCON_HOST"); v != "" {
+		cfg.RCON.Host = v
+	}
+	if v := os.Getenv("RCON_PORT"); v != "" {
+		cfg.RCON.Port = v
+	}
 	cfg.Discord.BotToken = os.Getenv("DISCORD_BOT_TOKEN")
 	cfg.Discord.ChannelID = os.Getenv("DISCORD_CHANNEL_ID")
 
